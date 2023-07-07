@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: MIT
+// WTF Solidity by 0xAA
+
+pragma solidity ^0.8.18;
+// the contract is used to check if the owner is ready to give his amount of eth from his address
+
+contract lock{
+    //we statistically say what variables are like something like this
+    address owner;
+    uint amount;
+    bool ready;
+    //we declare by stating the datatype
+// After this, we need to declare a constructor function which is used ONCE the contract is deployed
+// Whatever the data within the constructor function works once the contract is deployed
+     constructor()  payable public{
+         owner = msg.sender; //msg.sender represent the address being called AKA owner address in this case
+         amount = msg.value; //msg.value represent the amount of ether being sent
+         ready = false;
+    }
+    //next we can use modifiers
+    //we can create mofdifiers so that the only person that can call this contract is the owner
+    modifier onlyOwner (){
+        require (msg.sender == owner );
+        _; //.; meas that the compiler should shift to the actual function after running the modifier
+       // = means that one side is the other side
+       // == means they are equivalent
+       //=== means that they are unconditionally equal to each other
+    }
+    //create a modifier so that we only allocate funds if owner is ready
+    modifier onlyReady(){
+        require(ready == true); 
+        _;
+    }
+    //next we create an array of wallets that want in on the owner's amount of eth
+    address payable[] giveAwayWallet;
+
+
+    //we need to track who owns which wallet and how much everyone gets 
+
+    mapping (address => uint) giveAway;
+    //next we need to create a function that set the giveAway to each address
+
+    function setgiveAway (address payable wallet ,uint amount) onlyOwner public{
+        giveAwayWallet.push(wallet);
+        giveAway[wallet] = amount;
+    } 
+
+    //pay everyone based on their wallet address
+    function payDay() private onlyReady{
+        for (uint i=0; i<giveAwayWallet.length;i++) {
+             giveAwayWallet[i].transfer(giveAway[giveAwayWallet[i]]);
+             //transfering the funds from contract address to receiver address
+             
+        }
+    }
+    // oracle switch simulation
+    function moneyDay() public onlyOwner {
+        ready = true;
+        payDay();
+    }
+}
