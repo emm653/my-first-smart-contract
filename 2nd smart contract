@@ -1,0 +1,48 @@
+pragma solidity ^0.8.4;
+
+// A smart contract that checks if a person violates speed limit then deduct ether as fine
+
+contract fine{
+    address  govtWallet;
+    uint fineAmount;
+    bool speedLimit;
+    
+
+    constructor() payable public {
+        govtWallet = msg.sender;
+        fineAmount = msg.value;
+        speedLimit = false;
+        
+        //A constructor is simply a FUNCTION that is fired upon deployment
+        //so upon deployment of this smart contract, the sender of the SC(smart contract) is the government
+        //the fine is the value
+        //And the speedlimit hasn't been crossed yet
+    }
+    //It is necessary to name the modifier
+    modifier onlyGovt (){
+       require( govtWallet == msg.sender);
+        _;
+    }
+    modifier onlySpeed (){
+        require(speedLimit == true);
+        _;
+    }
+
+    function payGovt() private{
+        while(speedLimit=true){
+            address payable ADDR;
+                require(msg.value>= fineAmount);
+                ADDR.transfer(msg.value);
+         }
+            }
+       
+
+
+    // oracle simulation
+    function fineReady() public onlyGovt{
+        speedLimit = true;
+        payGovt();
+    }
+    
+
+}
